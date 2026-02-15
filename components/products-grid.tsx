@@ -125,7 +125,7 @@ export function ProductsGrid({
             href={`/product/${product.id}`}
             className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition hover:shadow-lg"
           >
-            <div className="relative aspect-3/4 overflow-hidden bg-muted">
+            <div className="relative aspect-[1.08/1] overflow-hidden bg-muted">
               {product.featuredImage ? (
                 <Image
                   src={product.featuredImage}
