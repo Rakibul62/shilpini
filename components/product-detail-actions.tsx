@@ -4,6 +4,7 @@ import { ShoppingCart, Check, ShoppingBag, Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { toast } from 'sonner';
+import { trackPixel } from '@/components/facebook-pixel';
 
 import { useRouter } from 'next/navigation';
 
@@ -87,6 +88,13 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
     }
 
     setIsAdded(true);
+    trackPixel('AddToCart', {
+      content_name: product.name,
+      content_ids: [product.id],
+      content_type: 'product',
+      value: product.price,
+      currency: 'BDT',
+    });
     setTimeout(() => {
       setIsAdded(false);
     }, 2000);
@@ -122,6 +130,22 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
     for (let i = 0; i < quantity; i++) {
       addItem(cartItemData);
     }
+
+    trackPixel('AddToCart', {
+      content_name: product.name,
+      content_ids: [product.id],
+      content_type: 'product',
+      value: product.price,
+      currency: 'BDT',
+    });
+
+    trackPixel('InitiateCheckout', {
+      content_ids: [product.id],
+      value: product.price,
+      currency: 'BDT',
+      num_items: quantity,
+      content_type: 'product',
+    });
 
     router.push('/checkout');
   };
@@ -159,7 +183,8 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
             </span>
           </div>
           <span className="text-xs text-green-700 dark:text-green-300">
-            {availableStock} available{currentCartQty > 0 && ` · ${currentCartQty} in cart`}
+            {availableStock} available
+            {currentCartQty > 0 && ` · ${currentCartQty} in cart`}
           </span>
         </div>
       </div>

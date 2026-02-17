@@ -4,6 +4,7 @@ import { Container } from '@/components/container';
 import { ProductImageGallery } from '@/components/product-image-gallery';
 import { ProductReviews } from '@/components/product-reviews';
 import { ProductDetailActions } from '@/components/product-detail-actions';
+import { PixelViewContent } from '@/components/pixel-events';
 import {
   getProductById,
   getProductReviews,
@@ -139,6 +140,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main className="min-h-screen bg-background pb-12 pt-8">
+      <PixelViewContent
+        product={{
+          id: product.id,
+          name: product.name,
+          price: Number(product.price),
+          category: product.category?.name,
+        }}
+      />
       <Container>
         {/* Breadcrumb */}
         <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:text-sm">

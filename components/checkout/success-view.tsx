@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Check, ArrowRight } from 'lucide-react';
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
+import { trackPixel } from '@/components/facebook-pixel';
 
 interface SuccessViewProps {
   orderNumber: string;
@@ -45,6 +46,22 @@ export function SuccessView({ orderNumber }: SuccessViewProps) {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    // Track Purchase
+    // We don't have the order details here (total, items) without fetching.
+    // For now, track the event with order ID.
+    // Ideally, we should pass order details to this component or fetch them.
+    // Since we just redirected, maybe we can't easily get value here without a fetch.
+    // OPTION: We could pass value in URL params (less secure) or just track generic purchase.
+    // Better: The user just came from checkout, but state is cleared.
+    // Let's track generic Purchase with order ID for now.
+    // To get value, we'd need to fetch the order by ID.
+    trackPixel('Purchase', {
+      order_id: orderNumber,
+      currency: 'BDT',
+    });
+  }, [orderNumber]);
 
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center p-4 text-center">
