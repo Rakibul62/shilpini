@@ -39,7 +39,7 @@ export const FacebookPixel = () => {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '314718029459353');
+            fbq('init', '756389740518410');
             fbq('track', 'PageView');
           `,
         }}
@@ -50,7 +50,7 @@ export const FacebookPixel = () => {
           height="1"
           width="1"
           style={{ display: 'none' }}
-          src="https://www.facebook.com/tr?id=314718029459353&ev=PageView&noscript=1"
+          src="https://www.facebook.com/tr?id=756389740518410&ev=PageView&noscript=1"
           alt=""
         />
       </noscript>
