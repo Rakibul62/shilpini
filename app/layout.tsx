@@ -4,7 +4,12 @@ import './globals.css';
 import { ReactQueryProvider } from '@/components/react-query-provider';
 import { CartProvider } from '@/lib/cart-context';
 import { GoogleAnalytics } from '@/components/google-analytics';
-import { FacebookPixel } from '@/components/facebook-pixel';
+import dynamic from 'next/dynamic';
+
+const FacebookPixel = dynamic(
+  () => import('@/components/facebook-pixel').then((mod) => mod.FacebookPixel),
+  { ssr: false },
+);
 import { Toaster } from 'sonner';
 
 const geistSans = Geist({
