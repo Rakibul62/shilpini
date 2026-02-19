@@ -4,7 +4,9 @@ import './globals.css';
 import { ReactQueryProvider } from '@/components/react-query-provider';
 import { CartProvider } from '@/lib/cart-context';
 import { GoogleAnalytics } from '@/components/google-analytics';
-import FacebookPixel from '@/components/FacebookPixel';
+import dynamic from 'next/dynamic';
+
+const FacebookPixel = dynamic(() => import('@/components/FacebookPixel'));
 import { Toaster } from 'sonner';
 
 const geistSans = Geist({
@@ -16,8 +18,6 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
-
-
 
 export const metadata: Metadata = {
   metadataBase: new URL(
