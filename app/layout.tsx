@@ -49,6 +49,9 @@ export const metadata: Metadata = {
     description:
       "Discover Shilpini's exclusive collection of premium Punjabi suits and authentic ethnic wear.",
   },
+  verification: {
+    google: 'GsIAObyBqSPT3_FLdX4FDgWFbhIkE22TLAs9HwYfF9M',
+  },
 };
 
 export default function RootLayout({
