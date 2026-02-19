@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { createOrder } from '@/lib/actions/orders';
 import { getSettings } from '@/lib/actions/settings';
-import { trackPixel } from '@/components/facebook-pixel';
+import { trackPixel } from '@/components/FacebookPixel';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { OrderSummary } from './order-summary';
@@ -55,7 +55,6 @@ export function CheckoutForm() {
         content_type: 'product',
       });
     }
-   
   }, []);
 
   // Auto-select delivery location based on district
