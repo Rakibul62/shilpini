@@ -4,7 +4,6 @@ import { ShoppingCart, Check, ShoppingBag, Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { toast } from 'sonner';
-import { trackPixel } from '@/components/FacebookPixel';
 
 import { useRouter } from 'next/navigation';
 
@@ -88,13 +87,15 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
     }
 
     setIsAdded(true);
-    trackPixel('AddToCart', {
-      content_name: product.name,
-      content_ids: [product.id],
-      content_type: 'product',
-      value: product.price,
-      currency: 'BDT',
-    });
+    if (typeof window.fbq !== 'undefined') {
+      window.fbq('track', 'AddToCart', {
+        content_name: product.name,
+        content_ids: [product.id],
+        content_type: 'product',
+        value: product.price,
+        currency: 'BDT',
+      });
+    }
     setTimeout(() => {
       setIsAdded(false);
     }, 2000);
@@ -131,21 +132,23 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
       addItem(cartItemData);
     }
 
-    trackPixel('AddToCart', {
-      content_name: product.name,
-      content_ids: [product.id],
-      content_type: 'product',
-      value: product.price,
-      currency: 'BDT',
-    });
+    if (typeof window.fbq !== 'undefined') {
+      window.fbq('track', 'AddToCart', {
+        content_name: product.name,
+        content_ids: [product.id],
+        content_type: 'product',
+        value: product.price,
+        currency: 'BDT',
+      });
 
-    trackPixel('InitiateCheckout', {
-      content_ids: [product.id],
-      value: product.price,
-      currency: 'BDT',
-      num_items: quantity,
-      content_type: 'product',
-    });
+      window.fbq('track', 'InitiateCheckout', {
+        content_ids: [product.id],
+        value: product.price,
+        currency: 'BDT',
+        num_items: quantity,
+        content_type: 'product',
+      });
+    }
 
     router.push('/checkout');
   };

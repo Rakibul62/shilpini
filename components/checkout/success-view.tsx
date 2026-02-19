@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Check, ArrowRight } from 'lucide-react';
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { trackPixel } from '@/components/FacebookPixel';
 
 interface SuccessViewProps {
   orderNumber: string;
@@ -57,10 +56,12 @@ export function SuccessView({ orderNumber }: SuccessViewProps) {
     // Better: The user just came from checkout, but state is cleared.
     // Let's track generic Purchase with order ID for now.
     // To get value, we'd need to fetch the order by ID.
-    trackPixel('Purchase', {
-      order_id: orderNumber,
-      currency: 'BDT',
-    });
+    if (typeof window.fbq !== 'undefined') {
+      window.fbq('track', 'Purchase', {
+        order_id: orderNumber,
+        currency: 'BDT',
+      });
+    }
   }, [orderNumber]);
 
   return (

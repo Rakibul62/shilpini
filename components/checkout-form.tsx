@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { createOrder } from '@/lib/actions/orders';
 import { getSettings } from '@/lib/actions/settings';
-import { trackPixel } from '@/components/FacebookPixel';
+
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { OrderSummary } from './order-summary';
@@ -47,13 +47,15 @@ export function CheckoutForm() {
 
     // Track InitiateCheckout
     if (items.length > 0) {
-      trackPixel('InitiateCheckout', {
-        num_items: items.reduce((acc, item) => acc + item.quantity, 0),
-        value: totalPrice,
-        currency: 'BDT',
-        content_ids: items.map((item) => item.id),
-        content_type: 'product',
-      });
+      if (typeof window.fbq !== 'undefined') {
+        window.fbq('track', 'InitiateCheckout', {
+          num_items: items.reduce((acc, item) => acc + item.quantity, 0),
+          value: totalPrice,
+          currency: 'BDT',
+          content_ids: items.map((item) => item.id),
+          content_type: 'product',
+        });
+      }
     }
   }, []);
 

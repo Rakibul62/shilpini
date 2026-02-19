@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { trackPixel } from './FacebookPixel';
 
 interface PixelViewContentProps {
   product: {
@@ -14,14 +13,16 @@ interface PixelViewContentProps {
 
 export function PixelViewContent({ product }: PixelViewContentProps) {
   useEffect(() => {
-    trackPixel('ViewContent', {
-      content_name: product.name,
-      content_ids: [product.id],
-      content_type: 'product',
-      value: product.price,
-      currency: 'BDT',
-      content_category: product.category,
-    });
+    if (typeof window.fbq !== 'undefined') {
+      window.fbq('track', 'ViewContent', {
+        content_name: product.name,
+        content_ids: [product.id],
+        content_type: 'product',
+        value: product.price,
+        currency: 'BDT',
+        content_category: product.category,
+      });
+    }
   }, [product]);
 
   return null;
