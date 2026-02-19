@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Check, ArrowRight } from 'lucide-react';
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { trackPixel } from '@/components/facebook-pixel';
+import { trackPixel } from '@/components/FacebookPixel';
 
 interface SuccessViewProps {
   orderNumber: string;

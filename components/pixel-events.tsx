@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { trackPixel } from './facebook-pixel';
+import { trackPixel } from './FacebookPixel';
 
 interface PixelViewContentProps {
   product: {

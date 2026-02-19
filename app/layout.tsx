@@ -6,10 +6,9 @@ import { CartProvider } from '@/lib/cart-context';
 import { GoogleAnalytics } from '@/components/google-analytics';
 import dynamic from 'next/dynamic';
 
-const FacebookPixel = dynamic(
-  () => import('@/components/facebook-pixel').then((mod) => mod.FacebookPixel),
-  { ssr: false },
-);
+const FacebookPixel = dynamic(() => import('@/components/FacebookPixel'), {
+  ssr: false,
+});
 import { Toaster } from 'sonner';
 
 const geistSans = Geist({

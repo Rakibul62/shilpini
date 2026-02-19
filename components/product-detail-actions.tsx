@@ -4,7 +4,7 @@ import { ShoppingCart, Check, ShoppingBag, Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { toast } from 'sonner';
-import { trackPixel } from '@/components/facebook-pixel';
+import { trackPixel } from '@/components/FacebookPixel';
 
 import { useRouter } from 'next/navigation';
 
