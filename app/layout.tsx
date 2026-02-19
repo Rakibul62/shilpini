@@ -7,6 +7,7 @@ import { GoogleAnalytics } from '@/components/google-analytics';
 import Script from 'next/script';
 import PixelTracker from '@/components/PixelTracker';
 import { Toaster } from 'sonner';
+import { Suspense } from 'react';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -79,7 +80,9 @@ export default function RootLayout({
             `,
           }}
         />
-        <PixelTracker />
+        <Suspense fallback={null}>
+          <PixelTracker />
+        </Suspense>
         <ReactQueryProvider>
           <CartProvider>
             {children}
