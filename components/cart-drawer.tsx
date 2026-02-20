@@ -101,7 +101,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     >
                       {/* Product Image */}
                       <Link
-                        href={generateProductUrl(item.name, item.id)}
+                        href={generateProductUrl(item.slug)}
                         onClick={onClose}
                         className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted"
                       >
@@ -123,7 +123,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       {/* Product Info */}
                       <div className="flex flex-1 flex-col">
                         <Link
-                          href={generateProductUrl(item.name, item.id)}
+                          href={generateProductUrl(item.slug)}
                           onClick={onClose}
                           className="line-clamp-2 text-sm font-medium hover:underline"
                         >

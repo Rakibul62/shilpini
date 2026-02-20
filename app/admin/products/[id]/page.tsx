@@ -31,6 +31,7 @@ export default async function EditProductPage({
   const initialData = {
     id: product.id,
     name: product.name,
+    slug: product.slug,
     description: product.description || '',
     price: product.price.toString(),
     comparePrice: product.comparePrice?.toString() || '',

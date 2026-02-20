@@ -6,6 +6,7 @@ interface PixelViewContentProps {
   product: {
     id: string;
     name: string;
+    slug: string;
     price: number | string;
     category?: string;
     featuredImage?: string | null;

@@ -1,9 +1,10 @@
-import { getHomeCollectionProducts } from "@/lib/actions/products";
-import { HomeCollectionsTabs } from "@/components/home-collections-tabs";
+import { getHomeCollectionProducts } from '@/lib/actions/products';
+import { HomeCollectionsTabs } from '@/components/home-collections-tabs';
 
 type ProductCard = {
   id: string;
   name: string;
+  slug: string;
   featuredImage: string | null;
   price: string;
   categoryName: string | null;
@@ -17,6 +18,7 @@ export default async function HomeCollectionsSection() {
     items.map((p) => ({
       id: p.id,
       name: p.name,
+      slug: p.slug,
       featuredImage: p.featuredImage,
       price: p.price.toString(),
       categoryName: p.category?.name ?? null,
@@ -34,4 +36,3 @@ export default async function HomeCollectionsSection() {
     />
   );
 }
-

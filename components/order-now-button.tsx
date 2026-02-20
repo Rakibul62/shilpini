@@ -8,6 +8,7 @@ interface OrderNowButtonProps {
   product: {
     id: string;
     name: string;
+    slug: string;
     price: string;
     featuredImage: string | null;
     stock: number;

@@ -11,6 +11,7 @@ import { generateProductUrl } from '@/lib/utils';
 interface Product {
   id: string;
   name: string;
+  slug: string;
   price: string;
   comparePrice: string | null;
   featuredImage: string | null;
@@ -123,7 +124,7 @@ export function ProductsGrid({
         {products.map((product) => (
           <Link
             key={product.id}
-            href={generateProductUrl(product.name, product.id)}
+            href={generateProductUrl(product.slug)}
             className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition hover:shadow-lg"
           >
             <div className="relative aspect-[1.08/1] overflow-hidden bg-muted">
@@ -170,6 +171,7 @@ export function ProductsGrid({
                   product={{
                     id: product.id,
                     name: product.name,
+                    slug: product.slug,
                     price: product.price,
                     featuredImage: product.featuredImage,
                     stock: product.stock,
@@ -182,6 +184,7 @@ export function ProductsGrid({
                   product={{
                     id: product.id,
                     name: product.name,
+                    slug: product.slug,
                     price: product.price,
                     featuredImage: product.featuredImage,
                     stock: product.stock,

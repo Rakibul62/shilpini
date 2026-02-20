@@ -1,17 +1,17 @@
-import { Container } from "@/components/container";
-import { ProductFilters } from "@/components/product-filters";
-import { ProductsGrid } from "@/components/products-grid";
-import { ProductSearch } from "@/components/product-search";
-import { getProducts, getAllCategories } from "@/lib/actions/products-list";
+import { Container } from '@/components/container';
+import { ProductFilters } from '@/components/product-filters';
+import { ProductsGrid } from '@/components/products-grid';
+import { ProductSearch } from '@/components/product-search';
+import { getProducts, getAllCategories } from '@/lib/actions/products-list';
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
 interface ShopPageProps {
   searchParams: Promise<{
     category?: string;
-    collection?: "NEW_ARRIVAL" | "BEST_SELL" | "TRENDING";
+    collection?: 'NEW_ARRIVAL' | 'BEST_SELL' | 'TRENDING';
     search?: string;
-    sort?: "newest" | "oldest" | "price-asc" | "price-desc";
+    sort?: 'newest' | 'oldest' | 'price-asc' | 'price-desc';
     skip?: string;
   }>;
 }
@@ -35,6 +35,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const mappedProducts = productsData.products.map((p) => ({
     id: p.id,
     name: p.name,
+    slug: p.slug,
     price: p.price.toString(),
     comparePrice: p.comparePrice?.toString() ?? null,
     featuredImage: p.featuredImage,
@@ -59,7 +60,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           <div className="flex-1">
             <ProductSearch />
           </div>
-          
+
           {/* Mobile Filter Button */}
           <div className="lg:hidden">
             <ProductFilters categories={categories} />

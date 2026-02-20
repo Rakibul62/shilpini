@@ -1,26 +1,27 @@
-"use client";
+'use client';
 
-import { ShoppingCart, Check } from "lucide-react";
-import { useState } from "react";
-import { useCart } from "@/lib/cart-context";
+import { ShoppingCart, Check } from 'lucide-react';
+import { useState } from 'react';
+import { useCart } from '@/lib/cart-context';
 
 interface AddToCartButtonProps {
   product: {
     id: string;
     name: string;
+    slug: string;
     price: string;
     featuredImage: string | null;
     stock: number;
     categoryName?: string | null;
   };
-  variant?: "default" | "icon" | "compact";
+  variant?: 'default' | 'icon' | 'compact';
   className?: string;
 }
 
 export function AddToCartButton({
   product,
-  variant = "default",
-  className = "",
+  variant = 'default',
+  className = '',
 }: AddToCartButtonProps) {
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
@@ -49,7 +50,7 @@ export function AddToCartButton({
     );
   }
 
-  if (variant === "icon") {
+  if (variant === 'icon') {
     return (
       <button
         type="button"
@@ -71,7 +72,7 @@ export function AddToCartButton({
     );
   }
 
-  if (variant === "compact") {
+  if (variant === 'compact') {
     return (
       <button
         type="button"

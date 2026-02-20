@@ -10,6 +10,7 @@ import { generateProductUrl } from '@/lib/utils';
 type ProductCard = {
   id: string;
   name: string;
+  slug: string;
   featuredImage: string | null;
   price: string;
   categoryName: string | null;
@@ -43,7 +44,7 @@ function ProductsGrid({
         {products.map((product) => (
           <Link
             key={product.id}
-            href={generateProductUrl(product.name, product.id)}
+            href={generateProductUrl(product.slug)}
             className="group snap-start flex w-64 shrink-0 flex-col overflow-hidden rounded-xl border bg-card transition hover:shadow-md"
           >
             <div className="relative aspect-3/4 overflow-hidden bg-muted">
@@ -100,7 +101,7 @@ function ProductsGrid({
           {products.map((product) => (
             <Link
               key={product.id}
-              href={generateProductUrl(product.name, product.id)}
+              href={generateProductUrl(product.slug)}
               className="group flex flex-col overflow-hidden rounded-xl border bg-card transition hover:shadow-md"
             >
               <div className="relative aspect-3/4 overflow-hidden bg-muted">

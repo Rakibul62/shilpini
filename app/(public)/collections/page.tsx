@@ -83,7 +83,7 @@ export default async function CollectionsPage() {
                     {collection.products.map((product) => (
                       <Link
                         key={product.id}
-                        href={generateProductUrl(product.name, product.id)}
+                        href={generateProductUrl(product.slug)}
                         className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition hover:shadow-lg"
                       >
                         <div className="relative aspect-3/4 overflow-hidden bg-muted">
@@ -132,6 +132,7 @@ export default async function CollectionsPage() {
                               product={{
                                 id: product.id,
                                 name: product.name,
+                                slug: product.slug,
                                 price: product.price.toString(),
                                 featuredImage: product.featuredImage,
                                 stock: product.stock,
@@ -144,6 +145,7 @@ export default async function CollectionsPage() {
                               product={{
                                 id: product.id,
                                 name: product.name,
+                                slug: product.slug,
                                 price: product.price.toString(),
                                 featuredImage: product.featuredImage,
                                 stock: product.stock,

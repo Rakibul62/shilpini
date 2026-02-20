@@ -14,6 +14,18 @@ export async function getProductById(id: string) {
   return product;
 }
 
+export async function getProductBySlug(slug: string) {
+  const product = await prisma.product.findUnique({
+    where: { slug },
+    include: {
+      category: true,
+      options: true,
+    },
+  });
+
+  return product;
+}
+
 export async function getProductReviews(productId: string) {
   const reviews = await prisma.review.findMany({
     where: {

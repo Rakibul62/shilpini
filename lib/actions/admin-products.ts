@@ -6,6 +6,7 @@ import { ProductCollection } from '../../generated/prisma/enums';
 
 export interface ProductFormData {
   name: string;
+  slug: string;
   description?: string;
   price: string;
   comparePrice?: string;
@@ -29,6 +30,7 @@ export async function createProduct(data: ProductFormData) {
   const product = await prisma.product.create({
     data: {
       name: data.name,
+      slug: data.slug,
       description: data.description || null,
       price: data.price,
       comparePrice: data.comparePrice || null,
@@ -65,6 +67,7 @@ export async function updateProduct(id: string, data: ProductFormData) {
       where: { id },
       data: {
         name: data.name,
+        slug: data.slug,
         description: data.description || null,
         price: data.price,
         comparePrice: data.comparePrice || null,

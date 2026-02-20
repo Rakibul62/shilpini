@@ -12,6 +12,7 @@ import {
   updateProduct,
   deleteProduct,
 } from '../../lib/actions/admin-products';
+import { slugify } from '../../lib/utils';
 
 interface Category {
   id: string;
@@ -43,6 +44,7 @@ export function ProductForm({
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: initialData?.name || '',
+    slug: initialData?.slug || '',
     description: initialData?.description || '',
     price: initialData?.price || '',
     comparePrice: initialData?.comparePrice || '',
@@ -106,6 +108,15 @@ export function ProductForm({
   const [imageInput, setImageInput] = useState('');
   const [isUploadingFeatured, setIsUploadingFeatured] = useState(false);
   const [isUploadingAdditional, setIsUploadingAdditional] = useState(false);
+  const [isSlugManual, setIsSlugManual] = useState(mode === 'edit');
+
+  const handleNameChange = (name: string) => {
+    const newFormData = { ...formData, name };
+    if (!isSlugManual) {
+      newFormData.slug = slugify(name);
+    }
+    setFormData(newFormData);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -253,10 +264,36 @@ export function ProductForm({
           <input
             type="text"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) => handleNameChange(e.target.value)}
             required
             className="w-full rounded-lg border bg-background px-4 py-2 text-sm"
           />
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium">Product Slug *</label>
+            <button
+              type="button"
+              onClick={() => setIsSlugManual(!isSlugManual)}
+              className="text-xs text-primary hover:underline"
+            >
+              {isSlugManual ? 'Switch to Auto' : 'Edit Manually'}
+            </button>
+          </div>
+          <input
+            type="text"
+            value={formData.slug}
+            onChange={(e) =>
+              setFormData({ ...formData, slug: slugify(e.target.value) })
+            }
+            required
+            disabled={!isSlugManual}
+            className="w-full rounded-lg border bg-background px-4 py-2 text-sm disabled:opacity-60"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            The URL friendly name for the product.
+          </p>
         </div>
 
         <div>

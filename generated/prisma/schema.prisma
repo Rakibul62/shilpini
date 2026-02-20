@@ -1,0 +1,224 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Admin User Model for Authentication
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String // Hashed password
+  name      String?
+  role      String   @default("admin") // admin, super_admin, etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+// Category Model for Product Categorization
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  image       String? // Optional category image
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@index([isActive])
+  @@index([order])
+  @@map("categories")
+}
+
+// Product Model for E-commerce
+
+model Product {
+  id            String              @id @default(cuid())
+  name          String
+  slug          String              @unique
+  description   String?             @db.Text
+  price         Decimal             @db.Decimal(10, 2)
+  comparePrice  Decimal?            @db.Decimal(10, 2) // Original price for discounts
+  sku           String?             @unique
+  stock         Int                 @default(0)
+  categoryId    String?
+  tags          String[] // Array of tags
+  featuredImage String? // Main/featured image URL
+  images        String[] // Array of image URLs
+  isActive      Boolean             @default(true)
+  isFeatured    Boolean             @default(false)
+  collections   ProductCollection[] // e.g. [NEW_ARRIVAL, TRENDING]
+  order         Int                 @default(0) // Manual sort order within lists
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  category   Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  options    ProductOption[]
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([order])
+  @@index([collections], type: Gin)
+  @@map("products")
+}
+
+model ProductOption {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  name   String
+  values String[]
+
+  @@index([productId])
+  @@map("product_options")
+}
+
+enum ProductCollection {
+  NEW_ARRIVAL
+  BEST_SELL
+  TRENDING
+}
+
+// Review Model - Can be for products or showcase reviews from other sources
+model Review {
+  id                   String   @id @default(cuid())
+  productId            String? // Optional: null for showcase reviews, set for product reviews
+  userName             String? // Optional username
+  userEmail            String?
+  rating               Int? // Optional 1-5 stars
+  comment              String?  @db.Text
+  image                String? // Optional image link
+  screnShotReviewImage String?
+  source               String? // Source of showcase review (e.g., "Google", "Trustpilot", etc.)
+  url                  String? // Optional external link to the review
+  isShowcase           Boolean  @default(false) // true for manually uploaded showcase reviews
+  isApproved           Boolean  @default(false) // Admin approval for reviews
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([productId])
+  @@index([isShowcase])
+  @@index([isApproved])
+  @@map("reviews")
+}
+
+// Slider Content Model for Homepage/Featured Sliders
+model SliderContent {
+  id          String   @id @default(cuid())
+  title       String?
+  description String?  @db.Text
+  image       String // Image URL
+  phoneImage  String? // Image URL
+  link        String? // Optional link (e.g., to a product or page)
+  buttonText  String? // CTA button text
+  order       Int      @default(0) // Display order
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([order])
+  @@map("slider_contents")
+}
+
+// Order Model
+model Order {
+  id          String @id @default(cuid())
+  orderNumber String @unique // A human-readable ID (e.g., ORD-1001)
+
+  // Customer Details
+  customerName  String
+  customerPhone String
+  address       String @db.Text
+
+  // Order Status
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+  paymentMethod String? // e.g., "COD", "BKASH"
+
+  // Financials
+  subtotal     Decimal @db.Decimal(10, 2)
+  shippingCost Decimal @default(0) @db.Decimal(10, 2)
+  discount     Decimal @default(0) @db.Decimal(10, 2)
+  total        Decimal @db.Decimal(10, 2)
+
+  // Relations
+  items OrderItem[]
+
+  // Metadata
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String? // Nullable if product is deleted
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  productName  String // Snapshot
+  productImage String? // Snapshot
+
+  quantity Int
+  price    Decimal @db.Decimal(10, 2) // Price at time of purchase
+
+  selectedOptions Json?
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+// Settings Model for Site-wide Configurations
+model Settings {
+  id                   String   @id @default("default")
+  insideDhakaShipping  Decimal  @default(70) @db.Decimal(10, 2)
+  outsideDhakaShipping Decimal  @default(180) @db.Decimal(10, 2)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Counter {
+  name  String @id
+  count Int    @default(0)
+}

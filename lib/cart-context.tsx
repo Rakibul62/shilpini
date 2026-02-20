@@ -12,6 +12,7 @@ export interface CartItem {
   id: string;
   cartItemId: string; // Unique ID for this specific cart entry (variant)
   name: string;
+  slug: string;
   price: string;
   featuredImage: string | null;
   quantity: number;

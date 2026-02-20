@@ -17,12 +17,6 @@ export function slugify(text: string) {
     .replace(/^-+|-+$/g, '');
 }
 
-export function generateProductUrl(name: string, id: string) {
-  const slug = slugify(name);
-  return slug ? `/product/${slug}-${id}` : `/product/${id}`;
-}
-
-export function extractProductId(slugOrId: string) {
-  const parts = slugOrId.split('-');
-  return parts[parts.length - 1];
+export function generateProductUrl(slug: string) {
+  return `/product/${slug}`;
 }

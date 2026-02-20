@@ -6,11 +6,10 @@ import { ProductReviews } from '@/components/product-reviews';
 import { ProductDetailActions } from '@/components/product-detail-actions';
 import { PixelViewContent } from '@/components/pixel-events';
 import {
-  getProductById,
+  getProductBySlug,
   getProductReviews,
 } from '@/lib/actions/product-detail';
 import { prisma } from '@/lib/prisma';
-import { extractProductId, slugify } from '@/lib/utils';
 
 import type { Metadata, ResolvingMetadata } from 'next';
 
@@ -22,8 +21,7 @@ export async function generateMetadata(
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const params = await props.params;
-  const productId = extractProductId(params.id);
-  const product = await getProductById(productId);
+  const product = await getProductBySlug(params.id);
 
   if (!product) {
     return {
@@ -58,12 +56,12 @@ export async function generateMetadata(
 export async function generateStaticParams() {
   const products = await prisma.product.findMany({
     where: { isActive: true },
-    select: { id: true, name: true },
+    select: { slug: true },
     take: 50, // Pre-generate top 50 products
   });
 
   return products.map((product) => ({
-    id: product.name ? `${slugify(product.name)}-${product.id}` : product.id,
+    id: product.slug,
   }));
 }
 
@@ -78,16 +76,14 @@ function formatPrice(value: string) {
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const { id: slugOrId } = await params;
-  const productId = extractProductId(slugOrId);
-  const [product, reviews] = await Promise.all([
-    getProductById(productId),
-    getProductReviews(productId),
-  ]);
+  const { id: slug } = await params;
+  const product = await getProductBySlug(slug);
 
   if (!product || !product.isActive) {
     notFound();
   }
+
+  const reviews = await getProductReviews(product.id);
 
   // JSON-LD Structured Data
   const jsonLd = {
@@ -103,7 +99,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     },
     offers: {
       '@type': 'Offer',
-      url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shilpini.com'}/product/${slugOrId}`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shilpini.com'}/product/${slug}`,
       priceCurrency: 'BDT',
       price: product.price,
       itemCondition: 'https://schema.org/NewCondition',
@@ -147,6 +143,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         product={{
           id: product.id,
           name: product.name,
+          slug: product.slug,
           price: Number(product.price),
           category: product.category?.name,
           featuredImage: product.featuredImage,
@@ -219,6 +216,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 product={{
                   id: product.id,
                   name: product.name,
+                  slug: product.slug,
                   price: product.price.toString(),
                   featuredImage: product.featuredImage,
                   stock: product.stock,

@@ -11,14 +11,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       isActive: true,
     },
     select: {
-      id: true,
-      name: true,
+      slug: true,
       updatedAt: true,
     },
   });
 
   const productEntries: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${baseUrl}${generateProductUrl(product.name, product.id)}`,
+    url: `${baseUrl}${generateProductUrl(product.slug)}`,
     lastModified: product.updatedAt,
     changeFrequency: 'weekly',
     priority: 0.8,

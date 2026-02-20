@@ -11,6 +11,7 @@ interface ProductDetailActionsProps {
   product: {
     id: string;
     name: string;
+    slug: string;
     price: string;
     featuredImage: string | null;
     stock: number;
@@ -74,6 +75,7 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
     // Construct cart item with options
     const cartItemData = {
       ...product,
+      slug: product.slug, // Explicitly ensure slug is included if it wasn't in prop spread
       selectedOptions: selectedOptions, // Pass this even if not typed yet in cart
       // Create a unique ID for this variant if needed,
       // but for now we keep ID same and let CartContext handle split if valid.
@@ -126,6 +128,7 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
     // Construct cart item with options
     const cartItemData = {
       ...product,
+      slug: product.slug,
       selectedOptions: selectedOptions,
     };
 

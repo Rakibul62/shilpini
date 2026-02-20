@@ -38,6 +38,7 @@ export default async function Home({ searchParams }: HomePageProps) {
   const mappedProducts = productsData.products.map((p) => ({
     id: p.id,
     name: p.name,
+    slug: p.slug,
     price: p.price.toString(),
     comparePrice: p.comparePrice?.toString() ?? null,
     featuredImage: p.featuredImage,
