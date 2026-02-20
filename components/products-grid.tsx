@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AddToCartButton } from '@/components/add-to-cart-button';
 import { OrderNowButton } from '@/components/order-now-button';
+import { generateProductUrl } from '@/lib/utils';
 
 interface Product {
   id: string;
@@ -122,7 +123,7 @@ export function ProductsGrid({
         {products.map((product) => (
           <Link
             key={product.id}
-            href={`/product/${product.id}`}
+            href={generateProductUrl(product.name, product.id)}
             className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition hover:shadow-lg"
           >
             <div className="relative aspect-[1.08/1] overflow-hidden bg-muted">

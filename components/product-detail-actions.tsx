@@ -94,6 +94,7 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
         content_type: 'product',
         value: product.price,
         currency: 'BDT',
+        image_url: product.featuredImage || undefined,
       });
     }
     setTimeout(() => {
@@ -139,6 +140,7 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
         content_type: 'product',
         value: product.price,
         currency: 'BDT',
+        image_url: product.featuredImage || undefined,
       });
 
       window.fbq('track', 'InitiateCheckout', {
@@ -147,6 +149,7 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
         currency: 'BDT',
         num_items: quantity,
         content_type: 'product',
+        image_url: product.featuredImage || undefined,
       });
     }
 

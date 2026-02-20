@@ -10,6 +10,7 @@ import {
   getProductReviews,
 } from '@/lib/actions/product-detail';
 import { prisma } from '@/lib/prisma';
+import { extractProductId, slugify } from '@/lib/utils';
 
 import type { Metadata, ResolvingMetadata } from 'next';
 
@@ -21,7 +22,8 @@ export async function generateMetadata(
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const params = await props.params;
-  const product = await getProductById(params.id);
+  const productId = extractProductId(params.id);
+  const product = await getProductById(productId);
 
   if (!product) {
     return {
@@ -56,12 +58,12 @@ export async function generateMetadata(
 export async function generateStaticParams() {
   const products = await prisma.product.findMany({
     where: { isActive: true },
-    select: { id: true },
+    select: { id: true, name: true },
     take: 50, // Pre-generate top 50 products
   });
 
   return products.map((product) => ({
-    id: product.id,
+    id: product.name ? `${slugify(product.name)}-${product.id}` : product.id,
   }));
 }
 
@@ -76,10 +78,11 @@ function formatPrice(value: string) {
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const { id } = await params;
+  const { id: slugOrId } = await params;
+  const productId = extractProductId(slugOrId);
   const [product, reviews] = await Promise.all([
-    getProductById(id),
-    getProductReviews(id),
+    getProductById(productId),
+    getProductReviews(productId),
   ]);
 
   if (!product || !product.isActive) {
@@ -100,7 +103,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     },
     offers: {
       '@type': 'Offer',
-      url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shilpini.com'}/product/${product.id}`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shilpini.com'}/product/${slugOrId}`,
       priceCurrency: 'BDT',
       price: product.price,
       itemCondition: 'https://schema.org/NewCondition',
@@ -146,6 +149,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           name: product.name,
           price: Number(product.price),
           category: product.category?.name,
+          featuredImage: product.featuredImage,
         }}
       />
       <Container>

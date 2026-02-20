@@ -54,6 +54,12 @@ export function CheckoutForm() {
           currency: 'BDT',
           content_ids: items.map((item) => item.id),
           content_type: 'product',
+          contents: items.map((item) => ({
+            id: item.id,
+            quantity: item.quantity,
+            item_price: item.price,
+            image_url: item.featuredImage || undefined,
+          })),
         });
       }
     }

@@ -4,6 +4,7 @@ import { Container } from '@/components/container';
 import { getProducts } from '@/lib/actions/products-list';
 import { AddToCartButton } from '@/components/add-to-cart-button';
 import { OrderNowButton } from '@/components/order-now-button';
+import { generateProductUrl } from '@/lib/utils';
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
@@ -82,7 +83,7 @@ export default async function CollectionsPage() {
                     {collection.products.map((product) => (
                       <Link
                         key={product.id}
-                        href={`/product/${product.id}`}
+                        href={generateProductUrl(product.name, product.id)}
                         className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition hover:shadow-lg"
                       >
                         <div className="relative aspect-3/4 overflow-hidden bg-muted">

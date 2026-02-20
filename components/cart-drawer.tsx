@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cart-context';
+import { generateProductUrl } from '@/lib/utils';
 
 function formatPrice(value: string) {
   const num = Number(value);
@@ -100,7 +101,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     >
                       {/* Product Image */}
                       <Link
-                        href={`/product/${item.id}`}
+                        href={generateProductUrl(item.name, item.id)}
                         onClick={onClose}
                         className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted"
                       >
@@ -122,7 +123,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       {/* Product Info */}
                       <div className="flex flex-1 flex-col">
                         <Link
-                          href={`/product/${item.id}`}
+                          href={generateProductUrl(item.name, item.id)}
                           onClick={onClose}
                           className="line-clamp-2 text-sm font-medium hover:underline"
                         >

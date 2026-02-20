@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
+import { generateProductUrl } from '@/lib/utils';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shilpini.com';
@@ -11,12 +12,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     select: {
       id: true,
+      name: true,
       updatedAt: true,
     },
   });
 
   const productEntries: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${baseUrl}/product/${product.id}`,
+    url: `${baseUrl}${generateProductUrl(product.name, product.id)}`,
     lastModified: product.updatedAt,
     changeFrequency: 'weekly',
     priority: 0.8,

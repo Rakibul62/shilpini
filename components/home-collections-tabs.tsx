@@ -1,10 +1,11 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Container } from "@/components/container";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Container } from '@/components/container';
+import { generateProductUrl } from '@/lib/utils';
 
 type ProductCard = {
   id: string;
@@ -17,10 +18,16 @@ type ProductCard = {
 function formatPrice(value: string) {
   const num = Number(value);
   if (Number.isNaN(num)) return value;
-  return `₹${num.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+  return `₹${num.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 }
 
-function ProductsGrid({ products, collectionKey }: { products: ProductCard[], collectionKey: string }) {
+function ProductsGrid({
+  products,
+  collectionKey,
+}: {
+  products: ProductCard[];
+  collectionKey: string;
+}) {
   if (!products.length) {
     return (
       <p className="py-8 text-sm text-muted-foreground">
@@ -36,7 +43,7 @@ function ProductsGrid({ products, collectionKey }: { products: ProductCard[], co
         {products.map((product) => (
           <Link
             key={product.id}
-            href={`/product/${product.id}`}
+            href={generateProductUrl(product.name, product.id)}
             className="group snap-start flex w-64 shrink-0 flex-col overflow-hidden rounded-xl border bg-card transition hover:shadow-md"
           >
             <div className="relative aspect-3/4 overflow-hidden bg-muted">
@@ -93,7 +100,7 @@ function ProductsGrid({ products, collectionKey }: { products: ProductCard[], co
           {products.map((product) => (
             <Link
               key={product.id}
-              href={`/product/${product.id}`}
+              href={generateProductUrl(product.name, product.id)}
               className="group flex flex-col overflow-hidden rounded-xl border bg-card transition hover:shadow-md"
             >
               <div className="relative aspect-3/4 overflow-hidden bg-muted">
@@ -132,12 +139,12 @@ function ProductsGrid({ products, collectionKey }: { products: ProductCard[], co
   );
 }
 
-type TabKey = "new" | "best" | "trending";
+type TabKey = 'new' | 'best' | 'trending';
 
 const tabConfig: { key: TabKey; label: string }[] = [
-  { key: "new", label: "New Arrivals" },
-  { key: "best", label: "Best Sell" },
-  { key: "trending", label: "Trending" },
+  { key: 'new', label: 'New Arrivals' },
+  { key: 'best', label: 'Best Sell' },
+  { key: 'trending', label: 'Trending' },
 ];
 
 interface HomeCollectionsTabsProps {
@@ -151,21 +158,17 @@ export function HomeCollectionsTabs({
   bestSell,
   trending,
 }: HomeCollectionsTabsProps) {
-  const [active, setActive] = useState<TabKey>("new");
+  const [active, setActive] = useState<TabKey>('new');
 
   const currentProducts =
-    active === "new"
-      ? newArrivals
-      : active === "best"
-        ? bestSell
-        : trending;
+    active === 'new' ? newArrivals : active === 'best' ? bestSell : trending;
 
   const currentCollectionKey =
-    active === "new"
-      ? "NEW_ARRIVAL"
-      : active === "best"
-        ? "BEST_SELL"
-        : "TRENDING";
+    active === 'new'
+      ? 'NEW_ARRIVAL'
+      : active === 'best'
+        ? 'BEST_SELL'
+        : 'TRENDING';
 
   return (
     <section className="pb-16 pt-10">
@@ -187,8 +190,8 @@ export function HomeCollectionsTabs({
                   onClick={() => setActive(tab.key)}
                   className={`relative rounded-full px-3 py-1 transition ${
                     isActive
-                      ? "bg-foreground text-background"
-                      : "border text-foreground/80 hover:text-foreground"
+                      ? 'bg-foreground text-background'
+                      : 'border text-foreground/80 hover:text-foreground'
                   }`}
                 >
                   {tab.label}
@@ -215,7 +218,10 @@ export function HomeCollectionsTabs({
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.18 }}
             >
-              <ProductsGrid products={currentProducts} collectionKey={currentCollectionKey} />
+              <ProductsGrid
+                products={currentProducts}
+                collectionKey={currentCollectionKey}
+              />
             </motion.div>
           </AnimatePresence>
         </div>
@@ -223,4 +229,3 @@ export function HomeCollectionsTabs({
     </section>
   );
 }
-

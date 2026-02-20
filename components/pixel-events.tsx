@@ -8,6 +8,7 @@ interface PixelViewContentProps {
     name: string;
     price: number | string;
     category?: string;
+    featuredImage?: string | null;
   };
 }
 
@@ -21,6 +22,7 @@ export function PixelViewContent({ product }: PixelViewContentProps) {
         value: product.price,
         currency: 'BDT',
         content_category: product.category,
+        image_url: product.featuredImage || undefined,
       });
     }
   }, [product]);
