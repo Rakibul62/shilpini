@@ -78,7 +78,7 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '756389740518410', { test_event_code: 'TEST94275' });
+              fbq('init', '889801470746571', { test_event_code: 'TEST94275' });
               fbq('track', 'PageView');
             `,
           }}
