@@ -43,6 +43,21 @@ export async function createOrder(data: CreateOrderInput) {
       return { success: false, error: 'Cart is empty' };
     }
 
+    const uniqueProductIds = Array.from(
+      new Set(items.map((item) => item.productId).filter(Boolean)),
+    ) as string[];
+    const validProductIdSet =
+      uniqueProductIds.length > 0
+        ? new Set(
+            (
+              await prisma.product.findMany({
+                where: { id: { in: uniqueProductIds } },
+                select: { id: true },
+              })
+            ).map((p) => p.id),
+          )
+        : new Set<string>();
+
     // Generate sequential order number (SHILP-1001, SHILP-1002, etc.)
     const counter = await prisma.counter.upsert({
       where: { name: 'order_number' },
@@ -67,7 +82,10 @@ export async function createOrder(data: CreateOrderInput) {
         total: total,
         items: {
           create: items.map((item) => ({
-            productId: item.productId,
+            productId:
+              item.productId && validProductIdSet.has(item.productId)
+                ? item.productId
+                : null,
             productName: item.productName,
             productImage: item.productImage,
             quantity: item.quantity,
@@ -158,6 +176,12 @@ export async function getOrders(query?: string) {
         : undefined,
       orderBy: { createdAt: 'desc' },
       include: {
+        items: {
+          select: {
+            id: true,
+            selectedOptions: true,
+          },
+        },
         _count: {
           select: { items: true },
         },

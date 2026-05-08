@@ -170,6 +170,29 @@ exports.Prisma.ProductOptionScalarFieldEnum = {
   values: 'values'
 };
 
+exports.Prisma.ProductVariantScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  sku: 'sku',
+  title: 'title',
+  price: 'price',
+  comparePrice: 'comparePrice',
+  stock: 'stock',
+  image: 'image',
+  images: 'images',
+  order: 'order',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProductVariantSelectionScalarFieldEnum = {
+  id: 'id',
+  variantId: 'variantId',
+  optionId: 'optionId',
+  value: 'value'
+};
+
 exports.Prisma.ReviewScalarFieldEnum = {
   id: 'id',
   productId: 'productId',
@@ -294,6 +317,8 @@ exports.Prisma.ModelName = {
   Category: 'Category',
   Product: 'Product',
   ProductOption: 'ProductOption',
+  ProductVariant: 'ProductVariant',
+  ProductVariantSelection: 'ProductVariantSelection',
   Review: 'Review',
   SliderContent: 'SliderContent',
   Order: 'Order',

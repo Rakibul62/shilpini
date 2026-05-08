@@ -1,7 +1,7 @@
 'use client';
 
 import { ShoppingCart, Check, ShoppingBag, Minus, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { toast } from 'sonner';
 
@@ -13,7 +13,9 @@ interface ProductDetailActionsProps {
     name: string;
     slug: string;
     price: string;
+    comparePrice?: string | null;
     featuredImage: string | null;
+    images?: string[];
     stock: number;
     categoryName?: string | null;
     options?: {
@@ -21,12 +23,48 @@ interface ProductDetailActionsProps {
       name: string;
       values: string[];
     }[];
+    variants?: {
+      id: string;
+      title?: string | null;
+      price?: string | null;
+      comparePrice?: string | null;
+      stock: number;
+      image?: string | null;
+      selections: {
+        optionName: string;
+        value: string;
+      }[];
+    }[];
   };
+  onResolvedVariantChange?: (resolved: {
+    image: string | null;
+    price: string;
+    comparePrice: string | null;
+    stock: number;
+  }) => void;
+  /** When set, forces the named option to switch to the given value */
+  selectedOptionOverride?: { optionName: string; value: string } | null;
+  /** Called when the user clicks an option button (not a gallery thumbnail) */
+  onOptionButtonSelect?: () => void;
 }
 
-// Helper removed
+const optionsMatch = (
+  a: Record<string, string> = {},
+  b: Record<string, string> = {},
+) => {
+  const keysA = Object.keys(a).sort();
+  const keysB = Object.keys(b).sort();
+  if (keysA.length !== keysB.length) return false;
+  if (!keysA.every((key, index) => key === keysB[index])) return false;
+  return keysA.every((key) => a[key] === b[key]);
+};
 
-export function ProductDetailActions({ product }: ProductDetailActionsProps) {
+export function ProductDetailActions({
+  product,
+  onResolvedVariantChange,
+  selectedOptionOverride,
+  onOptionButtonSelect,
+}: ProductDetailActionsProps) {
   const { addItem, items } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -34,13 +72,80 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
   // State for selected options
   const [selectedOptions, setSelectedOptions] = useState<
     Record<string, string>
-  >({});
+  >(() => {
+    const defaults: Record<string, string> = {};
+    for (const option of product.options || []) {
+      if (option.values.length > 0) {
+        defaults[option.name] = option.values[0];
+      }
+    }
+    return defaults;
+  });
 
-  const cartItem = items.find((item) => item.id === product.id);
+  const hasOptions = (product.options?.length || 0) > 0;
+  const allOptionsSelected = hasOptions
+    ? (product.options || []).every((option) => Boolean(selectedOptions[option.name]))
+    : true;
+
+  const selectedEntries = Object.entries(selectedOptions).filter(([, value]) => Boolean(value));
+  const matchedVariant =
+    selectedEntries.length > 0 && product.variants?.length
+      ? product.variants.find((variant) =>
+          selectedEntries.every(([optionName, selectedValue]) => {
+            const variantValue = variant.selections.find(
+              (selection) => selection.optionName === optionName,
+            )?.value;
+            return variantValue === selectedValue;
+          }),
+        )
+      : null;
+
+  const isVariantInheritingBasePrice = matchedVariant ? !matchedVariant.price : false;
+  const effectivePrice = matchedVariant?.price || product.price;
+  const effectiveComparePrice = matchedVariant
+    ? isVariantInheritingBasePrice
+      ? product.comparePrice || null
+      : matchedVariant.comparePrice || null
+    : product.comparePrice || null;
+  const effectiveStock = matchedVariant?.stock ?? product.stock;
+  const effectiveImage =
+    matchedVariant?.image || product.featuredImage || product.images?.[0] || '/window.svg';
+
+  useEffect(() => {
+    onResolvedVariantChange?.({
+      image: effectiveImage,
+      price: effectivePrice,
+      comparePrice: effectiveComparePrice,
+      stock: effectiveStock,
+    });
+  }, [
+    effectiveImage,
+    effectivePrice,
+    effectiveComparePrice,
+    effectiveStock,
+    onResolvedVariantChange,
+  ]);
+
+  const cartItem = items.find(
+    (item) =>
+      item.id === product.id &&
+      optionsMatch(item.selectedOptions, selectedOptions),
+  );
   const currentCartQty = cartItem?.quantity || 0;
-  const availableStock = product.stock - currentCartQty;
+  const availableStock = effectiveStock - currentCartQty;
+
+  // Apply external option override (e.g. from clicking a variant thumbnail in the gallery)
+  useEffect(() => {
+    if (selectedOptionOverride) {
+      setSelectedOptions((prev) => {
+        if (prev[selectedOptionOverride.optionName] === selectedOptionOverride.value) return prev;
+        return { ...prev, [selectedOptionOverride.optionName]: selectedOptionOverride.value };
+      });
+    }
+  }, [selectedOptionOverride]);
 
   const handleOptionSelect = (optionName: string, value: string) => {
+    onOptionButtonSelect?.();
     setSelectedOptions((prev) => ({
       ...prev,
       [optionName]: value,
@@ -75,7 +180,12 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
     // Construct cart item with options
     const cartItemData = {
       ...product,
+      id: product.id,
       slug: product.slug, // Explicitly ensure slug is included if it wasn't in prop spread
+      price: effectivePrice,
+      comparePrice: effectiveComparePrice,
+      stock: effectiveStock,
+      featuredImage: effectiveImage,
       selectedOptions: selectedOptions, // Pass this even if not typed yet in cart
       // Create a unique ID for this variant if needed,
       // but for now we keep ID same and let CartContext handle split if valid.
@@ -94,9 +204,9 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
         content_name: product.name,
         content_ids: [product.id],
         content_type: 'product',
-        value: product.price,
+        value: effectivePrice,
         currency: 'BDT',
-        image_url: product.featuredImage || undefined,
+        image_url: effectiveImage || undefined,
       });
     }
     setTimeout(() => {
@@ -128,7 +238,12 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
     // Construct cart item with options
     const cartItemData = {
       ...product,
+      id: product.id,
       slug: product.slug,
+      price: effectivePrice,
+      comparePrice: effectiveComparePrice,
+      stock: effectiveStock,
+      featuredImage: effectiveImage,
       selectedOptions: selectedOptions,
     };
 
@@ -141,18 +256,18 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
         content_name: product.name,
         content_ids: [product.id],
         content_type: 'product',
-        value: product.price,
+        value: effectivePrice,
         currency: 'BDT',
-        image_url: product.featuredImage || undefined,
+        image_url: effectiveImage || undefined,
       });
 
       window.fbq('track', 'InitiateCheckout', {
         content_ids: [product.id],
-        value: product.price,
+        value: effectivePrice,
         currency: 'BDT',
         num_items: quantity,
         content_type: 'product',
-        image_url: product.featuredImage || undefined,
+        image_url: effectiveImage || undefined,
       });
     }
 
@@ -167,7 +282,7 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
     if (quantity < availableStock) setQuantity(quantity + 1);
   };
 
-  if (product.stock <= 0) {
+  if (effectiveStock <= 0) {
     return (
       <div className="space-y-3">
         <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-center text-sm font-medium text-destructive">

@@ -11,6 +11,14 @@ function formatPrice(value: number | string) {
   return `৳ ${numValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 }
 
+function hasVariantSnapshot(selectedOptions: unknown) {
+  return Boolean(
+    selectedOptions &&
+      typeof selectedOptions === 'object' &&
+      Object.keys(selectedOptions as Record<string, unknown>).length > 0,
+  );
+}
+
 export default async function OrdersPage() {
   const { data: orders, error } = await getOrders();
 
@@ -69,6 +77,11 @@ export default async function OrdersPage() {
             </thead>
             <tbody className="divide-y">
               {orders.map((order) => (
+                (() => {
+                  const variantLineCount = order.items.filter((item) =>
+                    hasVariantSnapshot(item.selectedOptions),
+                  ).length;
+                  return (
                 <tr key={order.id} className="transition hover:bg-muted/30">
                   <td className="px-6 py-4">
                     <span className="font-mono text-sm font-medium">
@@ -91,9 +104,14 @@ export default async function OrdersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm">
-                      {order._count?.items || 0} items
-                    </span>
+                    <div className="space-y-0.5">
+                      <span className="text-sm">{order._count?.items || 0} items</span>
+                      {variantLineCount > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          {variantLineCount} variant lines
+                        </p>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="font-semibold">
@@ -115,6 +133,8 @@ export default async function OrdersPage() {
                     </Link>
                   </td>
                 </tr>
+                  );
+                })()
               ))}
             </tbody>
           </table>
@@ -133,6 +153,11 @@ export default async function OrdersPage() {
       {/* Mobile Card View */}
       <div className="space-y-4 md:hidden">
         {orders.map((order) => (
+          (() => {
+            const variantLineCount = order.items.filter((item) =>
+              hasVariantSnapshot(item.selectedOptions),
+            ).length;
+            return (
           <div
             key={order.id}
             className="rounded-xl border bg-card p-4 space-y-3"
@@ -154,6 +179,11 @@ export default async function OrdersPage() {
                 <p className="text-xs text-muted-foreground">
                   {order._count?.items || 0} items
                 </p>
+                {variantLineCount > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {variantLineCount} variant lines
+                  </p>
+                )}
               </div>
             </div>
 
@@ -179,6 +209,8 @@ export default async function OrdersPage() {
               </Link>
             </div>
           </div>
+            );
+          })()
         ))}
 
         {orders.length === 0 && (

@@ -44,9 +44,6 @@ export function OrderSummary({ shippingCost = 0 }: OrderSummaryProps) {
                   No img
                 </div>
               )}
-              <div className="absolute top-0 right-0 flex h-6 w-6 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-foreground text-[10px] font-bold text-background shadow-sm ring-2 ring-background z-10">
-                {item.quantity}
-              </div>
             </div>
             <div className="flex flex-1 flex-col justify-between h-full py-1">
               <div>
@@ -58,6 +55,14 @@ export function OrderSummary({ shippingCost = 0 }: OrderSummaryProps) {
                     {Object.values(item.selectedOptions).join(' / ')}
                   </p>
                 )}
+                <div className="mt-2 flex items-center gap-2 text-xs">
+                  <span className="inline-flex rounded-full bg-foreground/10 px-2 py-0.5 font-medium text-foreground">
+                    Qty: {item.quantity}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {formatPrice(item.price)} × {item.quantity}
+                  </span>
+                </div>
               </div>
               <div className="mt-2 text-sm font-semibold">
                 {formatPrice((Number(item.price) * item.quantity).toString())}

@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Container } from '@/components/container';
-import { ProductImageGallery } from '@/components/product-image-gallery';
 import { ProductReviews } from '@/components/product-reviews';
-import { ProductDetailActions } from '@/components/product-detail-actions';
+import { ProductDetailInteractive } from '@/components/product-detail-interactive';
 import { PixelViewContent } from '@/components/pixel-events';
 import {
   getProductBySlug,
@@ -69,12 +68,6 @@ interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
 
-function formatPrice(value: string) {
-  const num = Number(value);
-  if (Number.isNaN(num)) return value;
-  return `TK ${num.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-}
-
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id: slug } = await params;
   const product = await getProductBySlug(slug);
@@ -124,19 +117,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
         : undefined,
   };
 
-  const images = product.featuredImage
-    ? [product.featuredImage, ...product.images]
-    : product.images;
-
-  const discount =
-    product.comparePrice && Number(product.comparePrice) > Number(product.price)
-      ? Math.round(
-          ((Number(product.comparePrice) - Number(product.price)) /
-            Number(product.comparePrice)) *
-            100,
-        )
-      : null;
-
   return (
     <main className="min-h-screen bg-background pb-12 pt-8">
       <PixelViewContent
@@ -174,59 +154,33 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <span className="text-foreground">{product.name}</span>
         </nav>
 
-        {/* Product Details */}
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Image Gallery */}
-          <div>
-            <ProductImageGallery images={images} productName={product.name} />
-          </div>
-
-          {/* Product Info */}
-          <div className="space-y-6">
-            {/* Title */}
-            <div>
-              <h1 className="text-3xl font-medium tracking-tight sm:text-4xl text-foreground/90">
-                {product.name}
-              </h1>
-            </div>
-
-            {/* Price */}
-            <div className="flex items-baseline gap-3">
-              <span className="text-2xl font-semibold tracking-tight text-foreground">
-                {formatPrice(product.price.toString())}
-              </span>
-              {product.comparePrice &&
-                Number(product.comparePrice) > Number(product.price) && (
-                  <>
-                    <span className="text-lg text-muted-foreground line-through">
-                      {formatPrice(product.comparePrice.toString())}
-                    </span>
-                    {discount && (
-                      <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                        {discount}% OFF
-                      </span>
-                    )}
-                  </>
-                )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="border-t pt-6">
-              <ProductDetailActions
-                product={{
-                  id: product.id,
-                  name: product.name,
-                  slug: product.slug,
-                  price: product.price.toString(),
-                  featuredImage: product.featuredImage,
-                  stock: product.stock,
-                  categoryName: product.category?.name,
-                  options: product.options,
-                }}
-              />
-            </div>
-          </div>
-        </div>
+        <ProductDetailInteractive
+          product={{
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            price: product.price.toString(),
+            comparePrice: product.comparePrice?.toString() || null,
+            featuredImage: product.featuredImage,
+            images: product.images,
+            stock: product.stock,
+            categoryName: product.category?.name,
+            options: product.options,
+            variants: product.variants.map((variant) => ({
+              id: variant.id,
+              title: variant.title,
+              price: variant.price?.toString() || null,
+              comparePrice: variant.comparePrice?.toString() || null,
+              stock: variant.stock,
+              image: variant.image,
+              images: variant.images,
+              selections: variant.selections.map((selection) => ({
+                optionName: selection.option.name,
+                value: selection.value,
+              })),
+            })),
+          }}
+        />
 
         {/* Description */}
         {product.description && (

@@ -16,6 +16,19 @@ function formatPrice(value: number | string) {
   return `৳ ${numValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 }
 
+function parseSelectedOptions(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object') return {};
+  return Object.entries(value as Record<string, unknown>).reduce(
+    (acc, [key, val]) => {
+      if (typeof val === 'string' && val.trim()) {
+        acc[key] = val;
+      }
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
+}
+
 export default async function OrderDetailsPage({ params }: PageProps) {
   const { id } = await params;
 
@@ -62,6 +75,10 @@ export default async function OrderDetailsPage({ params }: PageProps) {
             <h2 className="mb-4 text-lg font-semibold">Order Items</h2>
             <div className="space-y-4">
               {order.items.map((item) => (
+                (() => {
+                  const selectedOptions = parseSelectedOptions(item.selectedOptions);
+                  const hasVariant = Object.keys(selectedOptions).length > 0;
+                  return (
                 <div key={item.id} className="flex gap-4 rounded-lg border p-4">
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
                     {item.productImage ? (
@@ -93,6 +110,18 @@ export default async function OrderDetailsPage({ params }: PageProps) {
                       <span>×</span>
                       <span>{formatPrice(Number(item.price))}</span>
                     </div>
+                    {hasVariant && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {Object.entries(selectedOptions).map(([key, value]) => (
+                          <span
+                            key={key}
+                            className="inline-flex rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                          >
+                            {key}: {value}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">
@@ -100,6 +129,8 @@ export default async function OrderDetailsPage({ params }: PageProps) {
                     </p>
                   </div>
                 </div>
+                  );
+                })()
               ))}
             </div>
 

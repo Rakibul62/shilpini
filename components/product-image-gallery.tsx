@@ -1,23 +1,41 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 
 interface ProductImageGalleryProps {
   images: string[];
   productName: string;
+  /** When set, syncs the active thumbnail to this index */
+  externalSelectedIndex?: number;
+  /** Called with the thumbnail index when a thumbnail is clicked */
+  onImageClick?: (index: number) => void;
 }
 
 export function ProductImageGallery({
   images,
   productName,
+  externalSelectedIndex,
+  onImageClick,
 }: ProductImageGalleryProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(externalSelectedIndex ?? 0);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  useEffect(() => {
+    if (externalSelectedIndex !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedIndex(externalSelectedIndex);
+    }
+  }, [externalSelectedIndex]);
+
   const displayImages = images.length > 0 ? images : ["/window.svg"];
+
+  const handleThumbnailClick = (index: number) => {
+    setSelectedIndex(index);
+    onImageClick?.(index);
+  };
 
   return (
     <>
@@ -45,7 +63,7 @@ export function ProductImageGallery({
             <button
               key={index}
               type="button"
-              onClick={() => setSelectedIndex(index)}
+              onClick={() => handleThumbnailClick(index)}
               className={`relative aspect-[1.08/1] overflow-hidden rounded-lg border-2 transition ${
                 index === selectedIndex
                   ? "border-foreground"
@@ -114,7 +132,7 @@ export function ProductImageGallery({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedIndex(index);
+                      handleThumbnailClick(index);
                     }}
                     className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border-2 transition ${
                       index === selectedIndex

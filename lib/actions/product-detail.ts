@@ -8,6 +8,17 @@ export async function getProductById(id: string) {
     include: {
       category: true,
       options: true,
+      variants: {
+        where: { isActive: true },
+        include: {
+          selections: {
+            include: {
+              option: true,
+            },
+          },
+        },
+        orderBy: { order: 'asc' },
+      },
     },
   });
 
@@ -20,6 +31,17 @@ export async function getProductBySlug(slug: string) {
     include: {
       category: true,
       options: true,
+      variants: {
+        where: { isActive: true },
+        include: {
+          selections: {
+            include: {
+              option: true,
+            },
+          },
+        },
+        orderBy: { order: 'asc' },
+      },
     },
   });
 

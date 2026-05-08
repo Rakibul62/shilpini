@@ -69,6 +69,7 @@ model Product {
 
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   options     ProductOption[]
+  variants    ProductVariant[]
   orderItems  OrderItem[]
 
   @@index([categoryId])
@@ -86,9 +87,52 @@ model ProductOption {
   
   name      String
   values    String[]
+  variantSelections ProductVariantSelection[]
 
   @@index([productId])
   @@map("product_options")
+}
+
+// Variant-level data: price, stock, and image can differ per option combination.
+model ProductVariant {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  sku          String?  @unique
+  title        String?  // e.g. "Red / XL"
+  price        Decimal? @db.Decimal(10, 2) // null means use Product.price
+  comparePrice Decimal? @db.Decimal(10, 2) // null means use Product.comparePrice
+  stock        Int      @default(0)
+  image        String?  // Variant-specific image
+  images       String[] // Variant gallery images
+  order        Int      @default(0)
+  isActive     Boolean  @default(true)
+
+  selections   ProductVariantSelection[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([productId])
+  @@index([productId, order])
+  @@index([isActive])
+  @@map("product_variants")
+}
+
+// Stores the chosen value for each option in a variant (e.g. Color=Red, Size=XL).
+model ProductVariantSelection {
+  id        String   @id @default(cuid())
+  variantId String
+  optionId  String
+  value     String
+
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  option    ProductOption  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, optionId])
+  @@index([optionId])
+  @@map("product_variant_selections")
 }
 
 enum ProductCollection {

@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
 import { prisma } from '../prisma';
 import { revalidatePath } from 'next/cache';
-import { ProductCollection } from '../../generated/prisma/enums';
+import { ProductCollection } from '../../generated/prisma/client';
 
 export interface ProductFormData {
   name: string;
@@ -24,33 +25,123 @@ export interface ProductFormData {
     name: string;
     values: string[];
   }[];
+  variants?: {
+    title?: string;
+    sku?: string;
+    price?: string;
+    comparePrice?: string;
+    stock: number;
+    image?: string;
+    images?: string[];
+    isActive: boolean;
+    order: number;
+    selections: {
+      optionName: string;
+      value: string;
+    }[];
+  }[];
+}
+
+function ensureVariantsHaveAllSelections(data: ProductFormData) {
+  const options = data.options || [];
+  const variants = data.variants || [];
+  if (options.length === 0 || variants.length === 0) return;
+
+  for (const [index, variant] of variants.entries()) {
+    const missing = options.filter((option) => {
+      const selected = variant.selections.find(
+        (selection) => selection.optionName.trim().toLowerCase() === option.name.trim().toLowerCase(),
+      );
+      return !selected?.value?.trim();
+    });
+
+    if (missing.length > 0) {
+      throw new Error(
+        `Variant ${index + 1} is missing selections for: ${missing
+          .map((option) => option.name)
+          .join(', ')}`,
+      );
+    }
+  }
 }
 
 export async function createProduct(data: ProductFormData) {
-  const product = await prisma.product.create({
-    data: {
-      name: data.name,
-      slug: data.slug,
-      description: data.description || null,
-      price: data.price,
-      comparePrice: data.comparePrice || null,
-      sku: data.sku || null,
-      stock: data.stock,
-      categoryId: data.categoryId || null,
-      tags: data.tags,
-      featuredImage: data.featuredImage || null,
-      images: data.images,
-      isActive: data.isActive,
-      isFeatured: data.isFeatured,
-      collections: data.collections,
-      order: data.order,
-      options: {
-        create: data.options?.map((opt) => ({
-          name: opt.name,
-          values: opt.values,
-        })),
+  ensureVariantsHaveAllSelections(data);
+
+  const product = await prisma.$transaction(async (tx) => {
+    const txAny = tx as any;
+    const created = await tx.product.create({
+      data: {
+        name: data.name,
+        slug: data.slug,
+        description: data.description || null,
+        price: data.price,
+        comparePrice: data.comparePrice || null,
+        sku: data.sku || null,
+        stock: data.stock,
+        categoryId: data.categoryId || null,
+        tags: data.tags,
+        featuredImage: data.featuredImage || null,
+        images: data.images,
+        isActive: data.isActive,
+        isFeatured: data.isFeatured,
+        collections: data.collections,
+        order: data.order,
+        options: {
+          create: data.options?.map((opt) => ({
+            name: opt.name,
+            values: opt.values,
+          })),
+        },
       },
-    },
+      include: {
+        options: true,
+      },
+    });
+
+    if (data.variants?.length) {
+      const optionByName = new Map(
+        created.options.map((option) => [option.name.trim().toLowerCase(), option]),
+      );
+
+      for (const variant of data.variants) {
+        const createdVariant = await txAny.productVariant.create({
+          data: {
+            productId: created.id,
+            title: variant.title || null,
+            sku: variant.sku || null,
+            price: variant.price || null,
+            comparePrice: variant.comparePrice || null,
+            stock: variant.stock,
+            image: variant.image || null,
+            images: variant.images || [],
+            isActive: variant.isActive,
+            order: variant.order,
+          },
+        });
+
+        const selectionsToCreate = variant.selections
+          .map((selection) => {
+            const option = optionByName.get(selection.optionName.trim().toLowerCase());
+            if (!option || !selection.value) return null;
+            return {
+              variantId: createdVariant.id,
+              optionId: option.id,
+              value: selection.value,
+            };
+          })
+          .filter(
+            (selection): selection is { variantId: string; optionId: string; value: string } =>
+              Boolean(selection),
+          );
+
+        if (selectionsToCreate.length > 0) {
+          await txAny.productVariantSelection.createMany({ data: selectionsToCreate });
+        }
+      }
+    }
+
+    return created;
   });
 
   revalidatePath('/admin/products');
@@ -60,9 +151,10 @@ export async function createProduct(data: ProductFormData) {
 }
 
 export async function updateProduct(id: string, data: ProductFormData) {
-  // Use transaction to ensure options are updated correctly
+  ensureVariantsHaveAllSelections(data);
+
   const product = await prisma.$transaction(async (tx) => {
-    // 1. Update basic product info
+    const txAny = tx as any;
     const updated = await tx.product.update({
       where: { id },
       data: {
@@ -84,7 +176,10 @@ export async function updateProduct(id: string, data: ProductFormData) {
       },
     });
 
-    // 2. Handle options: Delete existing and create new
+    await txAny.productVariant.deleteMany({
+      where: { productId: id },
+    });
+
     if (data.options) {
       await tx.productOption.deleteMany({
         where: { productId: id },
@@ -98,6 +193,52 @@ export async function updateProduct(id: string, data: ProductFormData) {
             values: opt.values,
           })),
         });
+      }
+    }
+
+    if (data.variants?.length) {
+      const createdOptions = await tx.productOption.findMany({
+        where: { productId: id },
+      });
+
+      const optionByName = new Map(
+        createdOptions.map((option) => [option.name.trim().toLowerCase(), option]),
+      );
+
+      for (const variant of data.variants) {
+        const createdVariant = await txAny.productVariant.create({
+          data: {
+            productId: id,
+            title: variant.title || null,
+            sku: variant.sku || null,
+            price: variant.price || null,
+            comparePrice: variant.comparePrice || null,
+            stock: variant.stock,
+            image: variant.image || null,
+            images: variant.images || [],
+            isActive: variant.isActive,
+            order: variant.order,
+          },
+        });
+
+        const selectionsToCreate = variant.selections
+          .map((selection) => {
+            const option = optionByName.get(selection.optionName.trim().toLowerCase());
+            if (!option || !selection.value) return null;
+            return {
+              variantId: createdVariant.id,
+              optionId: option.id,
+              value: selection.value,
+            };
+          })
+          .filter(
+            (selection): selection is { variantId: string; optionId: string; value: string } =>
+              Boolean(selection),
+          );
+
+        if (selectionsToCreate.length > 0) {
+          await txAny.productVariantSelection.createMany({ data: selectionsToCreate });
+        }
       }
     }
 

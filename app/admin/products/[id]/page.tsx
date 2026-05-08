@@ -19,6 +19,18 @@ export default async function EditProductPage({
       where: { id },
       include: {
         options: true,
+        variants: {
+          include: {
+            selections: {
+              include: {
+                option: true,
+              },
+            },
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
       },
     }),
     getAllCategoriesForForm(),
@@ -48,6 +60,21 @@ export default async function EditProductPage({
     options: product.options.map((opt) => ({
       name: opt.name,
       values: opt.values,
+    })),
+    variants: product.variants.map((variant) => ({
+      title: variant.title || '',
+      sku: variant.sku || '',
+      price: variant.price?.toString() || '',
+      comparePrice: variant.comparePrice?.toString() || '',
+      stock: variant.stock,
+      image: variant.image || '',
+      images: [...variant.images],
+      isActive: variant.isActive,
+      order: variant.order,
+      selections: variant.selections.map((selection) => ({
+        optionName: selection.option.name,
+        value: selection.value,
+      })),
     })),
   };
 
