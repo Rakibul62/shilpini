@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "../prisma";
-import { ProductCollection } from "../../generated/prisma/enums";
+import { ProductCollection } from "../../generated/prisma/client";
 
 type CollectionKey = keyof typeof ProductCollection;
 
