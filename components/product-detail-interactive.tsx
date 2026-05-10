@@ -43,7 +43,13 @@ function formatPrice(value: string) {
 }
 
 export function ProductDetailInteractive({ product }: ProductDetailInteractiveProps) {
-  const [resolvedState, setResolvedState] = useState({
+  const [resolvedState, setResolvedState] = useState<{
+    image: string | null;
+    price: string;
+    comparePrice: string | null;
+    stock: number;
+    firstOptionValue: string | null;
+  }>({
     image: product.featuredImage || product.images[0] || null,
     price: product.price,
     comparePrice: product.comparePrice || null,

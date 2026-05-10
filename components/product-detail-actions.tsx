@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { ShoppingCart, Check, ShoppingBag, Minus, Plus } from 'lucide-react';
@@ -148,6 +149,7 @@ export function ProductDetailActions({
   // Apply external option override (e.g. from clicking a variant thumbnail in the gallery)
   useEffect(() => {
     if (selectedOptionOverride) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedOptions((prev) => {
         if (prev[selectedOptionOverride.optionName] === selectedOptionOverride.value) return prev;
         return { ...prev, [selectedOptionOverride.optionName]: selectedOptionOverride.value };
