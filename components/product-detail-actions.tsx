@@ -41,6 +41,7 @@ interface ProductDetailActionsProps {
     price: string;
     comparePrice: string | null;
     stock: number;
+    firstOptionValue: string | null;
   }) => void;
   /** When set, forces the named option to switch to the given value */
   selectedOptionOverride?: { optionName: string; value: string } | null;
@@ -111,18 +112,28 @@ export function ProductDetailActions({
   const effectiveImage =
     matchedVariant?.image || product.featuredImage || product.images?.[0] || '/window.svg';
 
+  // Track which first-option value is currently selected so the gallery can
+  // snap to the right color section even when the matched variant has a
+  // different image URL than the gallery thumbnail (e.g. Blue/M vs Blue/S).
+  const firstOptionName = product.options?.[0]?.name ?? null;
+  const resolvedFirstOptionValue = firstOptionName
+    ? (selectedOptions[firstOptionName] ?? null)
+    : null;
+
   useEffect(() => {
     onResolvedVariantChange?.({
       image: effectiveImage,
       price: effectivePrice,
       comparePrice: effectiveComparePrice,
       stock: effectiveStock,
+      firstOptionValue: resolvedFirstOptionValue,
     });
   }, [
     effectiveImage,
     effectivePrice,
     effectiveComparePrice,
     effectiveStock,
+    resolvedFirstOptionValue,
     onResolvedVariantChange,
   ]);
 

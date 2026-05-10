@@ -48,6 +48,9 @@ export function ProductDetailInteractive({ product }: ProductDetailInteractivePr
     price: product.price,
     comparePrice: product.comparePrice || null,
     stock: product.stock,
+    // Track which first-option value is active so the gallery can snap to
+    // the correct section even when variant images differ across sizes.
+    firstOptionValue: product.options[0]?.values[0] ?? null,
   });
 
   // When a gallery thumbnail (belonging to a first-option value) is clicked,
@@ -138,12 +141,30 @@ export function ProductDetailInteractive({ product }: ProductDetailInteractivePr
     setUserGalleryIndex(null);
   }, []);
 
-  // Variant-driven index: which thumbnail corresponds to the resolved variant's primary image
+  // Variant-driven index: snap gallery to the right section based on the
+  // active first-option value. This handles the case where the matched
+  // variant's image differs from the gallery thumbnail image (e.g. Blue/M
+  // has a different image than Blue/S which was used to build the gallery).
   const variantDrivenIndex = useMemo(() => {
+    const fov = resolvedState.firstOptionValue;
+    if (fov) {
+      const meta = firstOptionImageMeta.find((m) => m.value === fov);
+      if (meta) {
+        // If the exact resolved image is one of this option-value's images, use it
+        const specificIdx = galleryImages.findIndex(
+          (img) => img === resolvedState.image && imageToOption.get(img)?.value === fov,
+        );
+        if (specificIdx >= 0) return specificIdx;
+        // Otherwise snap to the first image of this option-value's gallery section
+        const firstIdx = galleryImages.indexOf(meta.images[0]);
+        if (firstIdx >= 0) return firstIdx;
+      }
+    }
+    // Fallback: find by image URL
     if (!resolvedState.image) return 0;
     const idx = galleryImages.indexOf(resolvedState.image);
     return idx >= 0 ? idx : 0;
-  }, [resolvedState.image, galleryImages]);
+  }, [resolvedState, firstOptionImageMeta, galleryImages, imageToOption]);
 
   // Use the user's pinned index when they clicked a thumbnail directly,
   // otherwise fall back to the variant-driven index.
@@ -179,13 +200,15 @@ export function ProductDetailInteractive({ product }: ProductDetailInteractivePr
       price: string;
       comparePrice: string | null;
       stock: number;
+      firstOptionValue: string | null;
     }) => {
       setResolvedState((prev) => {
         if (
           prev.image === resolved.image &&
           prev.price === resolved.price &&
           prev.comparePrice === resolved.comparePrice &&
-          prev.stock === resolved.stock
+          prev.stock === resolved.stock &&
+          prev.firstOptionValue === resolved.firstOptionValue
         ) {
           return prev;
         }
