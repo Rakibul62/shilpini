@@ -295,36 +295,53 @@ export function ProductDetailActions({
     if (quantity < availableStock) setQuantity(quantity + 1);
   };
 
-  if (effectiveStock <= 0) {
-    return (
-      <div className="space-y-3">
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-center text-sm font-medium text-destructive">
-          Out of Stock
-        </div>
-        <p className="text-center text-xs text-muted-foreground">
-          This product is currently unavailable
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Stock Status */}
-      <div className="rounded-lg border border-green-200 bg-green-50/50 px-3 py-2 dark:border-green-900/30 dark:bg-green-950/10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-600 dark:bg-green-500" />
-            <span className="text-xs font-medium text-green-900 dark:text-green-100">
-              In Stock
+      {effectiveStock <= 0 ? (
+        <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+              <span className="text-xs font-medium text-destructive">
+                Out of Stock
+              </span>
+            </div>
+            <span className="text-xs text-destructive">
+              This variant is currently unavailable
             </span>
           </div>
-          <span className="text-xs text-green-700 dark:text-green-300">
-            {availableStock} available
-            {currentCartQty > 0 && ` · ${currentCartQty} in cart`}
-          </span>
         </div>
-      </div>
+      ) : availableStock <= 0 ? (
+        <div className="rounded-lg border border-orange-200 bg-orange-50/50 px-3 py-2 dark:border-orange-950/30 dark:bg-orange-950/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+              <span className="text-xs font-medium text-orange-900 dark:text-orange-100">
+                All in Cart
+              </span>
+            </div>
+            <span className="text-xs text-orange-700 dark:text-orange-300">
+              {currentCartQty} in cart (limit reached)
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-green-200 bg-green-50/50 px-3 py-2 dark:border-green-900/30 dark:bg-green-950/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-600 dark:bg-green-500" />
+              <span className="text-xs font-medium text-green-900 dark:text-green-100">
+                In Stock
+              </span>
+            </div>
+            <span className="text-xs text-green-700 dark:text-green-300">
+              {availableStock} available
+              {currentCartQty > 0 && ` · ${currentCartQty} in cart`}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Product Options */}
       {product.options && product.options.length > 0 && (
@@ -383,19 +400,19 @@ export function ProductDetailActions({
             <button
               type="button"
               onClick={decreaseQuantity}
-              disabled={quantity <= 1}
+              disabled={quantity <= 1 || effectiveStock <= 0}
               className="inline-flex h-11 w-11 items-center justify-center transition-colors hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
               aria-label="Decrease quantity"
             >
               <Minus className="h-4 w-4" />
             </button>
             <div className="flex h-11 w-14 items-center justify-center border-x-2 border-border">
-              <span className="text-base font-semibold">{quantity}</span>
+              <span className="text-base font-semibold">{effectiveStock <= 0 ? 0 : quantity}</span>
             </div>
             <button
               type="button"
               onClick={increaseQuantity}
-              disabled={quantity >= availableStock}
+              disabled={quantity >= availableStock || effectiveStock <= 0}
               className="inline-flex h-11 w-11 items-center justify-center transition-colors hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
               aria-label="Increase quantity"
             >
@@ -415,13 +432,18 @@ export function ProductDetailActions({
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={availableStock <= 0}
-          className="inline-flex h-12  py-2 flex-1 items-center justify-center gap-2 rounded-full bg-foreground text-background font-medium transition-all hover:bg-foreground/90 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed sm:h-13"
+          disabled={availableStock <= 0 || effectiveStock <= 0}
+          className="inline-flex h-12 py-2 flex-1 items-center justify-center gap-2 rounded-full bg-foreground text-background font-medium transition-all hover:bg-foreground/90 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed sm:h-13"
         >
           {isAdded ? (
             <>
               <Check className="h-5 w-5" />
               <span>Added to Cart</span>
+            </>
+          ) : effectiveStock <= 0 ? (
+            <>
+              <ShoppingCart className="h-5 w-5" />
+              <span>Out of Stock</span>
             </>
           ) : (
             <>
@@ -434,14 +456,15 @@ export function ProductDetailActions({
         <button
           type="button"
           onClick={handleOrderNow}
-          className="inline-flex h-12 flex-1 items-center py-2 justify-center gap-2 rounded-full border-2 border-gray-300 bg-white text-foreground font-medium transition-all hover:bg-gray-50 hover:shadow-lg dark:border-gray-700 dark:bg-slate-950 dark:hover:bg-slate-900 sm:h-13"
+          disabled={availableStock <= 0 || effectiveStock <= 0}
+          className="inline-flex h-12 flex-1 items-center py-2 justify-center gap-2 rounded-full border-2 border-gray-300 bg-white text-foreground font-medium transition-all hover:bg-gray-50 hover:shadow-lg dark:border-gray-700 dark:bg-slate-950 dark:hover:bg-slate-900 sm:h-13 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ShoppingBag className="h-5 w-5" />
-          <span>Order Now</span>
+          <span>{effectiveStock <= 0 ? 'Out of Stock' : 'Order Now'}</span>
         </button>
       </div>
 
-      {availableStock <= 0 && (
+      {effectiveStock > 0 && availableStock <= 0 && (
         <p className="text-center text-sm font-medium text-destructive">
           Cannot add more - stock limit reached
         </p>
