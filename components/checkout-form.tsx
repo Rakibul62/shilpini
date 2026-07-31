@@ -177,7 +177,9 @@ export function CheckoutForm() {
         setIsSuccess(true);
         clearCart();
         toast.success('Order placed successfully!');
-        router.push(`/checkout/success?orderNumber=${result.orderNumber}`);
+        router.push(
+          `/checkout/success?orderNumber=${result.orderNumber}&amount=${orderTotal}`,
+        );
       } else {
         toast.error(result.error || 'Failed to place order');
         setIsSubmitting(false);

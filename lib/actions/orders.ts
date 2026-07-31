@@ -282,3 +282,44 @@ export async function deleteOrder(id: string) {
     return { success: false, error: 'Failed to delete order' };
   }
 }
+
+// Public: Get single order by Order Number with items (used for checkout success & tracking)
+export async function getOrderByOrderNumber(orderNumber: string) {
+  try {
+    if (!orderNumber) {
+      return { success: false, error: 'Order number is required' };
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { orderNumber },
+      include: {
+        items: true,
+      },
+    });
+
+    if (!order) {
+      return { success: false, error: 'Order not found' };
+    }
+
+    return {
+      success: true,
+      data: {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        total: Number(order.total),
+        subtotal: Number(order.subtotal),
+        shippingCost: Number(order.shippingCost),
+        items: order.items.map((item) => ({
+          id: item.productId || item.id,
+          productName: item.productName,
+          quantity: item.quantity,
+          price: Number(item.price),
+        })),
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching order by order number:', error);
+    return { success: false, error: 'Failed to fetch order' };
+  }
+}
+

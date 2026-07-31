@@ -92,7 +92,9 @@ export function CheckoutForm() {
         clearCart();
         // Redirect to a success page or show a success message
         // For now, let's redirect to a simple success page or home with a query param
-        router.push(`/checkout/success?orderNumber=${result.orderNumber}`);
+        router.push(
+          `/checkout/success?orderNumber=${result.orderNumber}&amount=${orderTotal}`,
+        );
       } else {
         setError(result.error || 'Failed to place order');
       }
