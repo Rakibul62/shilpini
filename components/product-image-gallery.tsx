@@ -44,7 +44,7 @@ export function ProductImageGallery({
         <button
           type="button"
           onClick={() => setIsFullscreen(true)}
-          className="relative aspect-[1.08/1] w-full overflow-hidden rounded-2xl border bg-muted transition hover:opacity-95"
+          className="relative aspect-[452/512] w-full overflow-hidden rounded-2xl border bg-muted transition hover:opacity-95"
         >
           <Image
             src={displayImages[selectedIndex]}
@@ -64,7 +64,7 @@ export function ProductImageGallery({
               key={index}
               type="button"
               onClick={() => handleThumbnailClick(index)}
-              className={`relative aspect-[1.08/1] overflow-hidden rounded-lg border-2 transition ${
+              className={`relative aspect-[452/512] overflow-hidden rounded-lg border-2 transition ${
                 index === selectedIndex
                   ? "border-foreground"
                   : "border-transparent hover:border-muted-foreground/50"
